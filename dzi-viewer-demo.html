@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DZI Viewer Demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.1/openseadragon.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font: 14px system-ui, sans-serif; background: #15191e; color: #eee; }
+    body { display: flex; flex-direction: column; }
+    form { display: flex; gap: 8px; padding: 10px; background: #222930; }
+    input { flex: 1; min-width: 0; padding: 9px; }
+    button { padding: 9px 14px; cursor: pointer; }
+    #status { padding: 6px 10px; color: #c8d1da; }
+    #viewer { flex: 1; min-height: 0; background: #080a0c; }
+  </style>
+</head>
+<body>
+  <form id="form">
+    <input id="dziUrl" type="url" value="https://fieldwire-demo.s3.amazonaws.com/demo/plans/1/pages/3/page.dzi" aria-label="DZI URL" required>
+    <button type="submit">Open DZI</button>
+  </form>
+  <div id="status">Enter a DZI URL and select Open DZI.</div>
+  <div id="viewer"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const urlInput = document.getElementById('dziUrl');
+    const viewer = OpenSeadragon({
+      id: 'viewer',
+      prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.1/images/',
+      showNavigationControl: true,
+      showNavigator: true,
+      maxZoomPixelRatio: 8
+    });
+
+    viewer.addHandler('open', () => {
+      statusEl.textContent = 'DZI opened. Zoom with the mouse wheel; drag to pan.';
+    });
+    viewer.addHandler('open-failed', (event) => {
+      statusEl.textContent = 'Failed to open DZI: ' + (event.message || 'Check the URL and browser console.');
+      console.error('OpenSeadragon open-failed:', event);
+    });
+    viewer.addHandler('tile-load-failed', (event) => {
+      statusEl.textContent = 'A tile failed to load. Check its URL, S3 permissions, and CORS.';
+      console.error('OpenSeadragon tile-load-failed:', event);
+    });
+
+    document.getElementById('form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const url = urlInput.value.trim();
+      if (!url) return;
+      statusEl.textContent = 'Loading ' + url;
+      viewer.open(url);
+    });
+
+    viewer.open(urlInput.value);
+  </script>
+</body>
+</html>
