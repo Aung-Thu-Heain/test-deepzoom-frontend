@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // The Vite dev server proxies /api -> http://127.0.0.1:8000
 export const api = axios.create({
-  baseURL: 'https://backend.test/api',
+  baseURL: 'https://erpbackend.skysoft.com.mm/api',
   timeout: 30000,
 });
 

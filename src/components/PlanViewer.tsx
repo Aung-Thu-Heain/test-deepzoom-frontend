@@ -149,7 +149,7 @@ export function PlanViewer({ plan, onBack }: Props) {
     const el = containerRef.current;
     const update = () => {
       setSize({ width: el.clientWidth, height: el.clientHeight });
-      viewerStateRef.current?.viewport.resize();
+      viewerStateRef.current?.forceResize();
     };
 
     const ro = new ResizeObserver(update);
