@@ -104,6 +104,11 @@ function resizeViewer(v: OpenSeadragon.Viewer | null) {
   if (v && v.isOpen()) (v as ResizableViewer).forceResize();
 }
 
+/** The installed OSD typings predate Tile.getUrl(), which replaced Tile.url. */
+function getTileUrl(tile: OpenSeadragon.Tile): string {
+  return (tile as OpenSeadragon.Tile & { getUrl: () => string }).getUrl();
+}
+
 function hitTestIssue(v: OpenSeadragon.Viewer, list: Issue[], sx: number, sy: number): Issue | null {
   for (let i = list.length - 1; i >= 0; i--) {
     const issue = list[i];
@@ -289,15 +294,15 @@ export function PlanViewer({ plan, onBack }: Props) {
       setError(`Could not open drawing. Check the DZI URL and S3 CORS/access: ${event.message}`);
     };
     const onTileLoadFailed = (event: OpenSeadragon.TileLoadFailedEvent) => {
-      const tileUrl = event.tile.getUrl();
+      const tileUrl = getTileUrl(event.tile);
       console.error('OpenSeadragon could not load a tile:', tileUrl, event.message, event);
       setError(`Could not load drawing tile: ${tileUrl}. Check that the tile exists and S3 allows this app's origin.`);
     };
 
     // Debug-only handlers.
     const onAddItemFailed = (e: unknown) => console.error('[osd] add-item-failed', e);
-    const onTileLoaded = (e: { tile: { getUrl: () => string } }) => console.log('[osd] tile-loaded', e.tile.getUrl());
-    const onTileDrawn = (e: { tile: { getUrl: () => string } }) => console.log('[osd] tile-drawn', e.tile.getUrl());
+    const onTileLoaded = (e: OpenSeadragon.TileLoadedEvent) => console.log('[osd] tile-loaded', getTileUrl(e.tile));
+    const onTileDrawn = (e: OpenSeadragon.TileEvent) => console.log('[osd] tile-drawn', getTileUrl(e.tile));
 
     viewer.addHandler('open', onOpen);
     viewer.addHandler('open-failed', onOpenFailed);
